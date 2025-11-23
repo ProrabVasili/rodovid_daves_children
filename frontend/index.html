@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Родовід - Цифрове Генеалогічне Дерево</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="header">
+                <h1>🌳 Родовід</h1>
+                <p>Цифрове генеалогічне дерево з E2E шифруванням</p>
+            </div>
+
+            <!-- Search Panel -->
+            <div class="search-panel">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Пошук: Іван Коваленко лікар 1920">
+                    <button class="search-btn" id="searchBtn">🔍</button>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="results-container" id="results">
+                <div class="empty-state">
+                    <svg width="64" height="64" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <p><strong>Пошук в архівах</strong></p>
+                    <p>Введіть прізвище, професію, рік або місце</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Graph Area -->
+        <div class="graph-container">
+            <div class="controls">
+                <button class="control-btn primary" id="addBtn">
+                    <span>➕</span> Додати родича
+                </button>
+                <button class="control-btn" id="encryptBtn">
+                    <span id="encryptIcon">🔒</span>
+                    <span id="encryptText">Зашифровано</span>
+                </button>
+            </div>
+
+            <svg id="graph"></svg>
+
+            <!-- Person Info Panel -->
+            <div class="info-panel" id="infoPanel">
+                <div class="info-header">
+                    <h3 id="infoName">Виберіть особу</h3>
+                    <button class="close-btn" id="closePanelBtn">✕</button>
+                </div>
+                <div class="info-body" id="infoBody">
+                    <p>Клікніть на вузол дерева для деталей</p>
+                </div>
+                <div class="info-actions" id="infoActions"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Person Modal -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Додати родича</h2>
+                <button class="close-btn" id="closeAddModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>ПІБ</label>
+                    <input type="text" id="addName" placeholder="Іван Іванович Іваненко">
+                </div>
+                <div class="form-group">
+                    <label>Рік народження</label>
+                    <input type="text" id="addBirth" placeholder="1940">
+                </div>
+                <div class="form-group">
+                    <label>Рік смерті (опціонально)</label>
+                    <input type="text" id="addDeath" placeholder="2015">
+                </div>
+                <div class="form-group">
+                    <label>Додати до:</label>
+                    <select id="addParent"></select>
+                </div>
+                <div class="form-group">
+                    <label>Зв'язок:</label>
+                    <select id="addRelation">
+                        <option value="child">Дитина</option>
+                        <option value="parent">Батько/Мати</option>
+                        <option value="spouse">Подружжя</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Приватні нотатки (зашифровано E2E)</label>
+                    <textarea id="addNotes" rows="3" placeholder="Приватна інформація..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelAddBtn">Скасувати</button>
+                <button class="btn btn-primary" id="saveAddBtn">
+                    <span>🔒</span> Зберегти (E2E)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Person Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Редагувати</h2>
+                <button class="close-btn" id="closeEditModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>ПІБ</label>
+                    <input type="text" id="editName">
+                </div>
+                <div class="form-group">
+                    <label>Рік народження</label>
+                    <input type="text" id="editBirth">
+                </div>
+                <div class="form-group">
+                    <label>Рік смерті</label>
+                    <input type="text" id="editDeath">
+                </div>
+                <div class="form-group">
+                    <label>Приватні нотатки</label>
+                    <textarea id="editNotes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteBtn">🗑️ Видалити</button>
+                <button class="btn btn-secondary" id="cancelEditBtn">Скасувати</button>
+                <button class="btn btn-primary" id="saveEditBtn">
+                    <span>💾</span> Зберегти
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Archive Modal -->
+    <div class="modal" id="archiveModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Додати з архіву</h2>
+                <button class="close-btn" id="closeArchiveModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="archiveInfo"></div>
+                <div class="form-group">
+                    <label>Додати до:</label>
+                    <select id="archiveParent"></select>
+                </div>
+                <div class="form-group">
+                    <label>Зв'язок:</label>
+                    <select id="archiveRelation">
+                        <option value="child">Дитина</option>
+                        <option value="parent">Батько/Мати</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelArchiveBtn">Скасувати</button>
+                <button class="btn btn-primary" id="saveArchiveBtn">
+                    <span>➕</span> Додати до дерева
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="crypto.js"></script>
+    <script src="api.js"></script>
+    <script src="tree.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
